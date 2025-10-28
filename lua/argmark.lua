@@ -1,3 +1,34 @@
+---@class ArgmarkEditKeymap
+---@field cycle_right? string  -- key to cycle to the next arglist (default "<leader><leader>n")
+---@field cycle_left?  string  -- key to cycle to the previous arglist (default "<leader><leader>p")
+---@field go?          string  -- key to open file under cursor (default "<CR>")
+---@field quit?        string  -- key to save and quit (default "q")
+
+---@class ArgmarkEditOpts
+---@field keys? ArgmarkEditKeymap  -- override keybindings for the floating arglist editor
+
+---@class ArgmarkKeymap
+---@field rm?           string|false  -- remove buffer at count/current (<leader><leader>x)
+---@field add?          string|false  -- add buffer at count/current (<leader><leader>a)
+---@field go?           string|false  -- go to buffer at count (<leader><leader><leader>)
+---@field edit?         string|false  -- open floating editor (<leader><leader>e)
+---@field clear?        string|false  -- clear arglist (<leader><leader>X)
+---@field add_windows?  string|false  -- add all window buffers (<leader><leader>A)
+
+---@class ArgmarkOpts
+---@field keys? ArgmarkKeymap        -- normal-mode mappings
+---@field edit_opts? ArgmarkEditOpts -- passed to M.edit
+
+---@class Argmark
+---@field get_display_text fun(tar_win_id?: integer): string
+---@field get_arglist_display_text fun(tar_win_id?: integer): string
+---@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer)
+---@field go fun(num?: integer, tar_win_id?: integer)
+---@field rm fun(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)
+---@field add_windows fun(tar_win_id?: integer)
+---@field edit fun(tar_win_id?: integer, opts?: ArgmarkEditOpts)
+---@field setup fun(opts?: ArgmarkOpts)
+
 local M = {}
 
 ---@param tar_win_id? number
@@ -352,4 +383,5 @@ function M.setup(opts)
   end
 end
 
+---@type Argmark
 return M
