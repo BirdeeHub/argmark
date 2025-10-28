@@ -22,14 +22,28 @@ The neovim arglist is local to that session, so I find myself using this a lot m
 
 However, any session saving like `mksession` or any of the plugins which wrap it will also still allow you to save them, if you want.
 
-## Reference/Usage:
 
-#### Install:
+## Install:
 
 ```lua
 vim.pack.add("https://github.com/BirdeeHub/argmark")
--- or other equivalent method. It is a single lua file.
+-- You may omit this call if you would rather use the functions it exports to make your own keybindings
+require("argmark").setup {}
 ```
+
+or other equivalent method. It is a single lua file.
+
+Here's the lazy.nvim example:
+
+```lua
+require("lazy").setup {
+    -- Your other plugin specs here...
+    { "https://github.com/BirdeeHub/argmark", opts = { --[[passed to setup]] } }
+    -- Your other plugin specs here...
+}
+```
+
+## Reference/Usage:
 
 All functions (except setup) accept an optional `tar_win_id` parameter (`integer`).
 
