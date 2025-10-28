@@ -1,14 +1,16 @@
 # ARGMARK - Neovim plugin for more effectively utilizing the arglist
 
-Tiny neovim plugin to turn your arglist into a more useful tool
+Tiny neovim plugin to turn your arglist into a more useful tool.
 
-Provides an editable buffer like [harpoon](https://github.com/ThePrimeagen/harpoon)'s or [grapple](https://github.com/cbochs/grapple.nvim)'s to allow you to change the entries in ANY of your arglists.
+It provides:
 
-Provides some functions which can be used to more easily use the argslist in lua code,
+- An editable buffer like [harpoon](https://github.com/ThePrimeagen/harpoon)'s or [grapple](https://github.com/cbochs/grapple.nvim)'s to allow you to change the entries in ANY of your arglists.
 
-Provides a setup function as a shorthand to define keybindings for common buffer actions using those functions.
+- Some functions which can be used to more easily use the argslist in lua code,
 
-Provides functions providing display text which may be used as a lualine component.
+- A setup function as a shorthand to define keybindings for common buffer actions using those functions.
+
+- Functions providing display text which may be used as a lualine component.
 
 ## Why use this? I already have harpoon or grapple
 
