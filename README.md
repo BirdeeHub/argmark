@@ -77,8 +77,9 @@ require("argmark").setup {
             cycle_right = "<leader><leader>n",
             cycle_left = "<leader><leader>p",
             go = "<CR>",
-            quit = "Q",
-            exit = "q",
+            quit = "Q" -- save and quit
+            exit = "q" -- exit
+            -- :write or :w also saves, but doesn't quit
         }
     }
 }
@@ -105,6 +106,8 @@ and a display to show which arglist you are in.
 It defines keybindings to cycle through the arglists, and open the current argument
 
 The list updates when the buffer is written (`:w`) or when you quit (`Q`).
+
+It saves only the currently selected arglist on write or `Q`
 
 Exiting in another manner than the quit or exit keys, e.g. `<c-w>q`, will ask if you want to save first.
 
