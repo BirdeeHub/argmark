@@ -96,6 +96,8 @@ require("argmark").setup {
 <leader><leader>A   add all window buffers
 ```
 
+Note: "accepts a count" means that you can input a number before inputting the keybinding. ([:help count](https://neovim.io/doc/user/intro.html#count))
+
 ---
 
 ### `argmark.edit(opts?: table, tar_win_id?: integer)`
