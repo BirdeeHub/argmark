@@ -100,6 +100,8 @@ Note: "accepts a count" means that you can input a number before inputting the k
 
 Note 2: To change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
 
+Note 3: To change between global and local arglists, use `:argglobal` and `:arglocal`.
+
 You can map them to something if desired, but the argslist is a builtin thing,
 and many of the builtin methods are good enough.
 That being said, they usually only target the current window's arglist.
