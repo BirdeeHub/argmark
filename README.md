@@ -88,7 +88,7 @@ and a display to show which arglist you are in.
 
 It defines keybindings to cycle through the arglists, and open the current argument
 
-The list updates when the buffer is written (`:w`) or when you quit (`q`).
+The list updates when the buffer is written (`:w`) or when you quit (`Q`).
 
 **Optional keys in `opts`:**
 
