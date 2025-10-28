@@ -55,7 +55,7 @@ Otherwise, the argslist corresponding to the window with the given id is used.
 
 ---
 
-### `M.setup(opts?: { keys?: table, edit_opts?: table })`
+### `argmark.setup(opts?: { keys?: table, edit_opts?: table })`
 
 Registers normal-mode keybindings for arglist manipulation.
 
@@ -97,7 +97,7 @@ require("argmark").setup {
 
 ---
 
-### `M.edit(opts?: table, tar_win_id?: integer)`
+### `argmark.edit(opts?: table, tar_win_id?: integer)`
 
 Opens an editable floating window showing the contents of the current arglist,
 and a display to show which arglist you are in.
@@ -130,7 +130,7 @@ q                   (exit) close
 
 ---
 
-### `M.get_display_text(tar_win_id?: integer) → string`
+### `argmark.get_display_text(tar_win_id?: integer) → string`
 
 Returns a formatted string representation of the arglist for `tar_win_id`.
 
@@ -152,7 +152,7 @@ require('lualine').setup {
 
 ---
 
-### `M.get_arglist_display_text(tar_win_id?: integer) → string`
+### `argmark.get_arglist_display_text(tar_win_id?: integer) → string`
 
 Returns a short label summarizing which arglists exist and which the given window belongs to.
 Example:
@@ -165,7 +165,7 @@ This may be used as a lualine component as well if desired, but its main purpose
 
 ---
 
-### `M.add(num_or_name_s?: integer|string|string[], tar_win_id?: integer)`
+### `argmark.add(num_or_name_s?: integer|string|string[], tar_win_id?: integer)`
 
 Adds one or more entries to the arglist of the specified window.
 **Parameters:**
@@ -182,7 +182,7 @@ Duplicates are automatically removed with `:argdedupe`.
 
 ---
 
-### `M.go(num?: integer, tar_win_id?: integer)`
+### `argmark.go(num?: integer, tar_win_id?: integer)`
 
 Jumps to an argument entry by position.
 **Parameters:**
@@ -195,7 +195,7 @@ Errors if arglist is empty.
 
 ---
 
-### `M.rm(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)`
+### `argmark.rm(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)`
 
 Removes arguments from the list.
 **Parameters:**
@@ -212,14 +212,15 @@ Removes arguments from the list.
 Examples:
 
 ```lua
-M.rm(3)         -- remove arg 3  
-M.rm(2, 5)      -- remove args 2–5  
-M.rm("foo.lua") -- remove by name
+local argmark = require('argmark')
+argmark.rm(3)         -- remove arg 3  
+argmark.rm(2, 5)      -- remove args 2–5  
+argmark.rm("foo.lua") -- remove by name
 ```
 
 ---
 
-### `M.add_windows(tar_win_id?: integer)`
+### `argmark.add_windows(tar_win_id?: integer)`
 
 Adds the main buffers of all windows to the arglist for the target window.
 Duplicates removed automatically.
