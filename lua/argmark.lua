@@ -3,6 +3,7 @@
 ---@field cycle_left?  string  -- key to cycle to the previous arglist (default "<leader><leader>p")
 ---@field go?          string  -- key to open file under cursor (default "<CR>")
 ---@field quit?        string  -- key to save and quit (default "q")
+---@field exit?        string  -- key to quit without saving (default "Q")
 
 ---@class ArgmarkEditOpts
 ---@field keys? ArgmarkEditKeymap  -- override keybindings for the floating arglist editor
@@ -343,6 +344,12 @@ function M.edit(tar_win_id, opts)
     callback = function()
       pcall(vim.api.nvim_win_close, winid, true)
     end
+  })
+  vim.keymap.set("n", keys.exit or "Q", function()
+    pcall(vim.api.nvim_win_close, winid, true)
+  end, {
+    buffer = argseditor,
+    desc = "Exit without updating arglist",
   })
 end
 

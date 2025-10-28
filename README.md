@@ -60,6 +60,7 @@ require("argmark").setup {
             cycle_left = "<leader><leader>p",
             go = "<CR>",
             quit = "q",
+            exit = "Q",
         }
     }
 }
