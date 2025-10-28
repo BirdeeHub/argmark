@@ -42,7 +42,9 @@ Otherwise, the argslist corresponding to the window with the given id is used.
 ### `M.setup(opts?: { keys?: table, edit_opts?: table })`
 
 Registers normal-mode keybindings for arglist manipulation.
-Each keybinding may be replaced or disabled with `false`.
+
+Each keybinding may be changed.
+Global keybindings (the ones not in the edit window) may also disabled with `false`.
 
 ```lua
 require("argmark").setup {
@@ -92,11 +94,11 @@ The list updates when the buffer is written (`:w`) or when you quit (`q`).
 
 * `keys`: table defining overrides for in-buffer keymaps
 
-  * `cycle_right` (`string`)
-  * `cycle_left` (`string`)
-  * `go` (`string`)
-  * `quit` (`string`)
-  * `exit` (`string`)
+  * `cycle_right` (`string?`)
+  * `cycle_left` (`string?`)
+  * `go` (`string?`)
+  * `quit` (`string?`)
+  * `exit` (`string?`)
 
 **Default in-buffer mappings:**
 
