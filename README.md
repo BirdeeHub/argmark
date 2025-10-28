@@ -99,8 +99,11 @@ require("argmark").setup {
 Note: "accepts a count" means that you can input a number before inputting the keybinding. ([:help count](https://neovim.io/doc/user/intro.html#count))
 
 Note 2: To change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
+
 You can map them to something if desired, but the argslist is a builtin thing,
 and many of the builtin methods are good enough.
+That being said, they only work on the current windows arglist.
+So lua functions which allow you to select the global list as well as by window may be added eventually.
 
 ---
 
