@@ -104,6 +104,8 @@ It defines keybindings to cycle through the arglists, and open the current argum
 
 The list updates when the buffer is written (`:w`) or when you quit (`Q`).
 
+Exiting in another manner than the quit or exit keys, e.g. `<c-w>q`, will ask if you want to save first.
+
 **Optional keys in `opts`:**
 
 * `keys`: table defining overrides for in-buffer keymaps
