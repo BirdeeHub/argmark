@@ -59,8 +59,8 @@ require("argmark").setup {
             cycle_right = "<leader><leader>n",
             cycle_left = "<leader><leader>p",
             go = "<CR>",
-            quit = "q",
-            exit = "Q",
+            quit = "Q",
+            exit = "q",
         }
     }
 }
@@ -96,6 +96,7 @@ The list updates when the buffer is written (`:w`) or when you quit (`q`).
   * `cycle_left` (`string`)
   * `go` (`string`)
   * `quit` (`string`)
+  * `exit` (`string`)
 
 **Default in-buffer mappings:**
 
@@ -103,7 +104,8 @@ The list updates when the buffer is written (`:w`) or when you quit (`q`).
 <CR>                open file under cursor
 <leader><leader>n   cycle right through arglists
 <leader><leader>p   cycle left through arglists
-q                   update and close
+Q                   (quit) update and close
+q                   (exit) close
 ```
 
 ---
