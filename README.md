@@ -133,7 +133,15 @@ Highlights the current argument with brackets `[name]`.
 Displays which arglist you are in if not global
 Useful for statusline or tabline components.
 
-For example this function can be used directly as a lualine component
+For example this function can be used directly as a lualine component:
+
+```lua
+require('lualine').setup {
+    tabline = {
+        lualine_x = { require("argmark").get_display_text },
+    }
+}
+```
 
 ---
 
