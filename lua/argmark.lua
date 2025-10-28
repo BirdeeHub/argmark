@@ -124,20 +124,22 @@ end
 function M.go(num, tar_win_id)
   tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
   local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-  if needs_force_global then vim.cmd.argglobal() end
   local arglen = vim.fn.argc(tar_win_id)
   if num > 0 and arglen >= num then
-    vim.api.nvim_win_call(tar_win_id, function()
+    vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
+      if needs_force_global then vim.cmd.argglobal() end
       vim.cmd.argument(num)
+      if needs_force_global then vim.cmd.arglocal() end
     end)
   elseif arglen > 0 then
     vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
+      if needs_force_global then vim.cmd.argglobal() end
       vim.cmd.argument(vim.fn.argidx() + 1)
+      if needs_force_global then vim.cmd.arglocal() end
     end)
   else
     error("No args to go to!")
   end
-  if needs_force_global then vim.cmd.arglocal() end
 end
 
 ---@param num_or_name? number|string|string[]
