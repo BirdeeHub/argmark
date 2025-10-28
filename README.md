@@ -71,10 +71,10 @@ require("argmark").setup {
 **Default mappings:**
 
 ```
-<leader><leader>a   add current buffer
-<leader><leader>x   remove current buffer
+<leader><leader>a   add current buffer (accepts a count, meaning buffer number to add instead of current)
+<leader><leader>x   remove current buffer (accepts a count, meaning arglist index to remove instead of current)
 <leader><leader>X   clear arglist
-<leader><leader><leader>   go to arg under count
+<leader><leader><leader>   go to arg under count (accepts a count, meaning arglist index to go to)
 <leader><leader>e   open floating arglist editor
 <leader><leader>A   add all window buffers
 ```
