@@ -355,7 +355,7 @@ function M.edit(opts, tar_win_id)
   })
 end
 
----@param opts ArgmarkOpts
+---@param opts? ArgmarkOpts
 function M.setup(opts)
   opts = opts or {}
   local keys = opts.keys or {}
