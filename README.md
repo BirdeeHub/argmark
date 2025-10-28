@@ -129,8 +129,11 @@ q                   (exit) close
 ### `M.get_display_text(tar_win_id?: integer) → string`
 
 Returns a formatted string representation of the arglist for `tar_win_id`.
+
 Highlights the current argument with brackets `[name]`.
+
 Displays which arglist you are in if not global
+
 Useful for statusline or tabline components.
 
 For example this function can be used directly as a lualine component:
