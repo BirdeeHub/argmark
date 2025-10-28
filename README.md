@@ -24,6 +24,13 @@ However, any session saving like `mksession` or any of the plugins which wrap it
 
 ## Reference/Usage:
 
+#### Install:
+
+```lua
+vim.pack.add("https://github.com/BirdeeHub/argmark")
+-- or other equivalent method. It is a single lua file.
+```
+
 All functions (except setup) accept an optional `tar_win_id` parameter (`integer`).
 
 If `tar_win_id == -1`, the function is guaranteed to operate on the **global arglist**.
