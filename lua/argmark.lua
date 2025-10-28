@@ -238,7 +238,7 @@ local function overwrite_argslist(bufnr, tar_win_id)
     end
     local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
     if needs_force_global then vim.cmd.argglobal() end
-    pcall(vim.cmd.argdelete, { range = { 1, vim.fn.argc() } })
+    pcall(vim.cmd.argdelete, "*")
     if #to_write > 0 then
       local ok, err = pcall(vim.cmd.argadd, { args = to_write })
       if not ok then vim.notify(err, vim.log.levels.ERROR) end
@@ -384,7 +384,7 @@ function M.setup(opts)
   end
   if keys.clear ~= false then
     vim.keymap.set("n", keys.clear or "<leader><leader>X", function()
-      local ok, err = pcall(M.rm, 1, vim.fn.argc())
+      local ok, err = pcall(M.rm, "*")
       if not ok then vim.notify(err or "Failed to clear arglist", vim.log.levels.WARN) end
     end, { desc = "Clear arglist" })
   end
