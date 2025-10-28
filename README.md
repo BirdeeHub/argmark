@@ -37,6 +37,27 @@ Otherwise, the argslist corresponding to the window with the given id is used.
 Registers normal-mode keybindings for arglist manipulation.
 Each keybinding may be replaced or disabled with `false`.
 
+```lua
+require("argmark").setup {
+    keys = {
+        rm = "<leader><leader>x",
+        go = "<leader><leader><leader>",
+        add = "<leader><leader>a",
+        edit = "<leader><leader>e",
+        clear = "<leader><leader>X",
+        add_windows = "<leader><leader>A",
+    },
+    edit_opts = {
+        keys = {
+            cycle_right = "<leader><leader>n",
+            cycle_left = "<leader><leader>p",
+            go = "<CR>",
+            quit = "q",
+        }
+    }
+}
+```
+
 **Default mappings:**
 
 ```
