@@ -219,5 +219,5 @@ M.rm("foo.lua") -- remove by name
 
 ### `M.add_windows(tar_win_id?: integer)`
 
-Adds the buffers of all visible windows to the arglist for the target window.
+Adds the main buffers of all windows to the arglist for the target window.
 Duplicates removed automatically.
