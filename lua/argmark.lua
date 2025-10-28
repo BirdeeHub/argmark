@@ -272,7 +272,7 @@ local function get_arglist_list()
   return result
 end
 
----@param opts? table
+---@param opts? ArgmarkEditOpts
 ---@param tar_win_id? number
 function M.edit(opts, tar_win_id)
   opts = opts or {}
@@ -355,6 +355,7 @@ function M.edit(opts, tar_win_id)
   })
 end
 
+---@param opts ArgmarkOpts
 function M.setup(opts)
   opts = opts or {}
   local keys = opts.keys or {}
