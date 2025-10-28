@@ -97,7 +97,7 @@ require("argmark").setup {
 
 ---
 
-### `M.edit(tar_win_id?: integer, opts?: table)`
+### `M.edit(opts?: table, tar_win_id?: integer)`
 
 Opens an editable floating window showing the contents of the current arglist,
 and a display to show which arglist you are in.

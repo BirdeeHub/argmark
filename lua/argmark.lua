@@ -27,7 +27,7 @@
 ---@field go fun(num?: integer, tar_win_id?: integer)
 ---@field rm fun(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)
 ---@field add_windows fun(tar_win_id?: integer)
----@field edit fun(tar_win_id?: integer, opts?: ArgmarkEditOpts)
+---@field edit fun(opts?: ArgmarkEditOpts, tar_win_id?: integer)
 ---@field setup fun(opts?: ArgmarkOpts)
 
 local M = {}
@@ -272,9 +272,9 @@ local function get_arglist_list()
   return result
 end
 
----@param tar_win_id? number
 ---@param opts? table
-function M.edit(tar_win_id, opts)
+---@param tar_win_id? number
+function M.edit(opts, tar_win_id)
   opts = opts or {}
   local keys = opts.keys or {}
   tar_win_id = (type(tar_win_id) == "number" and tar_win_id >= 0) and tar_win_id or vim.api.nvim_get_current_win()
@@ -378,7 +378,7 @@ function M.setup(opts)
   end
   if keys.edit ~= false then
     vim.keymap.set("n", keys.edit or "<leader><leader>e", function()
-      M.edit(nil, opts.edit_opts)
+      M.edit(opts.edit_opts)
     end, { silent = true, desc = "edit arglist in floating window"})
   end
   if keys.clear ~= false then
