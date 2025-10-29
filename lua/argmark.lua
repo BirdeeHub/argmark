@@ -426,8 +426,8 @@ function M.setup(opts)
   if keys.copy ~= false then
     vim.keymap.set("n", keys.copy or "<leader><leader>c", function()
       local ok, err = pcall(M.copy, vim.v.count)
-      if not ok then vim.notify(err or "Failed to copy target arglist into new local arglist", vim.log.levels.ERROR) end
-    end, { silent = true, desc = "Copy (count or global) arglist to a new local arglist"})
+      if not ok then vim.notify(err or "Failed to copy target arglist into local arglist", vim.log.levels.ERROR) end
+    end, { silent = true, desc = "Copy (count or global) arglist to current (or new) local arglist"})
   end
   if keys.edit ~= false then
     vim.keymap.set("n", keys.edit or "<leader><leader>e", function()
