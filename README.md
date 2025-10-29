@@ -136,6 +136,28 @@ So a few more lua functions which allow you to select the global list as well as
 
 ---
 
+### `argmark.get_display_text(tar_win_id?: integer) → string`
+
+Returns a formatted string representation of the arglist for `tar_win_id`.
+
+Highlights the current argument with brackets `[name]`.
+
+Displays which arglist you are in if not global
+
+Useful for statusline or tabline components.
+
+For example this function can be used directly as a lualine component:
+
+```lua
+require('lualine').setup {
+    tabline = {
+        lualine_x = { require("argmark").get_display_text },
+    }
+}
+```
+
+---
+
 ### `argmark.edit(opts?: table, tar_win_id?: integer)`
 
 Opens an editable floating window showing the contents of the current arglist,
@@ -187,28 +209,6 @@ window-local arglist identified by its `arglist_id`.
 - If `tar_win_id` is `-1`, the copied list replaces the **global** arglist.
 - If the target window previously had a local arglist and the global list is
   modified instead, its original local list is restored afterward.
-
----
-
-### `argmark.get_display_text(tar_win_id?: integer) → string`
-
-Returns a formatted string representation of the arglist for `tar_win_id`.
-
-Highlights the current argument with brackets `[name]`.
-
-Displays which arglist you are in if not global
-
-Useful for statusline or tabline components.
-
-For example this function can be used directly as a lualine component:
-
-```lua
-require('lualine').setup {
-    tabline = {
-        lualine_x = { require("argmark").get_display_text },
-    }
-}
-```
 
 ---
 
