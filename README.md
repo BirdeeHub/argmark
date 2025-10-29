@@ -12,7 +12,11 @@ It provides:
 
 - Functions providing display text which may be used as a lualine component.
 
-## Why use this? What would that look like? (or I already have harpoon or grapple? Why more lists?)
+---
+
+## Why use this? What would that look like?
+
+#### (or, I already have harpoon or grapple? Why more lists?)
 
 Global marks are the usual way of holding a location to go back to across files.
 
