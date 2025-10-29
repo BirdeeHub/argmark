@@ -125,7 +125,7 @@ require("argmark").setup {
 
 Note: "accepts a count" means that you can input a number before inputting the keybinding. ([:help count](https://neovim.io/doc/user/intro.html#count))
 
-Note 2: To change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
+Note 2: Outside of using the `go` keybinding, to change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
 
 Note 3: To change back to the global argslist after creating a local one with the copy keybind, use `:argglobal`. Then to reenter it, you can use `:arglocal` again.
 
