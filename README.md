@@ -65,10 +65,11 @@ Global keybindings (the ones not in the edit window) may also disabled with `fal
 ```lua
 require("argmark").setup {
     keys = {
+        edit = "<leader><leader>e",
         rm = "<leader><leader>x",
         go = "<leader><leader><leader>",
         add = "<leader><leader>a",
-        edit = "<leader><leader>e",
+        copy = "<leader><leader>c",
         clear = "<leader><leader>X",
         add_windows = "<leader><leader>A",
     },
@@ -88,11 +89,12 @@ require("argmark").setup {
 **Default mappings:**
 
 ```
+<leader><leader>e   open floating arglist editor
 <leader><leader>a   add current buffer (accepts a count, meaning buffer number to add instead of current)
 <leader><leader>x   remove current buffer (accepts a count, meaning arglist index to remove instead of current)
 <leader><leader>X   clear arglist
 <leader><leader><leader>   go to current arg (accepts a count, meaning arglist index to go to)
-<leader><leader>e   open floating arglist editor
+<leader><leader>c   copy global arglist into local arglist (accepts a count, meaning the arglist to copy instead of global)
 <leader><leader>A   add all window buffers
 ```
 
@@ -100,7 +102,7 @@ Note: "accepts a count" means that you can input a number before inputting the k
 
 Note 2: To change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
 
-Note 3: To change between global and local arglists, use `:argglobal` and `:arglocal`.
+Note 3: To change back to the global argslist after creating a local one with the copy keybind, use `:argglobal`. Then to reenter it, you can use `:arglocal` again.
 
 You can map them to something if desired, but the argslist is a builtin thing,
 and many of the builtin methods are good enough.
@@ -141,6 +143,25 @@ Exiting in another manner than the quit or exit keys, e.g. `<c-w>q`, will ask if
 Q                   (quit) update and close
 q                   (exit) close
 ```
+
+---
+
+### `argmark.copy(arglist_id?: number, tar_win_id?: integer)`
+
+Copy the contents of one arglist into another window's arglist (or the global list).
+
+This function allows transferring argument lists between windows,
+or between the global arglist and a window-local arglist.
+
+It supports copying either the global list (id = 0) or any existing
+window-local arglist identified by its `arglist_id`.
+
+- If `arglist_id` is `0`, the **global** arglist is copied.
+- If `arglist_id` matches a window-local arglist, that list is copied.
+- If `tar_win_id` refers to a normal window, the copied list replaces its arglist.
+- If `tar_win_id` is `-1`, the copied list replaces the **global** arglist.
+- If the target window previously had a local arglist and the global list is
+  modified instead, its original local list is restored afterward.
 
 ---
 

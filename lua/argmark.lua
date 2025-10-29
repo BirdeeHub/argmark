@@ -1,30 +1,47 @@
 ---@class ArgmarkEditKeymap
----@field cycle_right? string  -- key to cycle to the next arglist (default "<leader><leader>n")
----@field cycle_left?  string  -- key to cycle to the previous arglist (default "<leader><leader>p")
----@field go?          string  -- key to open file under cursor (default "<CR>")
----@field quit?        string  -- key to save and quit (default "Q")
----@field exit?        string  -- key to quit without saving (default "q")
+---key to cycle to the next arglist (default "<leader><leader>n")
+---@field cycle_right? string
+---key to cycle to the previous arglist (default "<leader><leader>p")
+---@field cycle_left?  string
+---key to open file under cursor (default "<CR>")
+---@field go?          string
+---key to save and quit (default "Q")
+---@field quit?        string
+---key to quit without saving (default "q")
+---@field exit?        string
 
 ---@class ArgmarkEditOpts
----@field keys? ArgmarkEditKeymap  -- override keybindings for the floating arglist editor
+---override keybindings for the floating arglist editor
+---@field keys? ArgmarkEditKeymap
 
 ---@class ArgmarkKeymap
----@field rm?           string|false  -- remove buffer at count/current (<leader><leader>x)
----@field add?          string|false  -- add buffer at count/current (<leader><leader>a)
----@field go?           string|false  -- go to buffer at count (<leader><leader><leader>)
----@field edit?         string|false  -- open floating editor (<leader><leader>e)
----@field clear?        string|false  -- clear arglist (<leader><leader>X)
----@field add_windows?  string|false  -- add all window buffers (<leader><leader>A)
+---remove buffer at count/current (<leader><leader>x)
+---@field rm?           string|false
+---add buffer at count/current (<leader><leader>a)
+---@field add?          string|false
+---go to buffer at count (<leader><leader><leader>)
+---@field go?           string|false
+---open floating editor (<leader><leader>e)
+---@field edit?         string|false
+---clear arglist (<leader><leader>X)
+---@field clear?        string|false
+---add all window buffers (<leader><leader>A)
+---@field add_windows?  string|false
+---copy arglist by id (default global) into new local arglist (<leader><leader>c)
+---@field copy?  string|false
 
 ---@class ArgmarkOpts
----@field keys? ArgmarkKeymap        -- normal-mode mappings
----@field edit_opts? ArgmarkEditOpts -- passed to M.edit
+---normal-mode mappings
+---@field keys? ArgmarkKeymap
+---passed to M.edit
+---@field edit_opts? ArgmarkEditOpts
 
 ---@class Argmark
 ---@field get_display_text fun(tar_win_id?: integer): string
 ---@field get_arglist_display_text fun(tar_win_id?: integer): string
 ---@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer)
 ---@field go fun(num?: integer, tar_win_id?: integer)
+---@field copy fun(arglist_id?: integer, tar_win_id?: integer)
 ---@field rm fun(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)
 ---@field add_windows fun(tar_win_id?: integer)
 ---@field edit fun(opts?: ArgmarkEditOpts, tar_win_id?: integer)
@@ -165,6 +182,35 @@ function M.rm(num_or_name, num, tar_win_id)
     else
       vim.cmd.argdelete "%"
     end
+    if needs_force_global then vim.cmd.arglocal() end
+  end)
+end
+
+local function get_arglist(arglist_id)
+  if arglist_id == 0 then
+    return vim.fn.argv(-1, -1)
+  else
+    for _, w in ipairs(vim.api.nvim_list_wins()) do
+      if vim.fn.arglistid(w) == arglist_id then
+        return vim.fn.argv(-1, w)
+      end
+    end
+    return {}
+  end
+end
+---@param arglist_id number
+---@param tar_win_id? number
+function M.copy(arglist_id, tar_win_id)
+  tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
+  if type(arglist_id) ~= "number" or arglist_id < 0 then
+    arglist_id = 0
+  end
+  local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
+  vim.api.nvim_win_call(needs_force_global and vim.api.nvim_get_current_win() or tar_win_id, function()
+    if needs_force_global then vim.cmd.argglobal() -- if not setting into global list,
+    else vim.cmd.arglocal() end  -- make a window-local list
+    vim.cmd.argdelete "*"
+    vim.cmd.argadd({ args = get_arglist(arglist_id) })
     if needs_force_global then vim.cmd.arglocal() end
   end)
 end
@@ -376,6 +422,12 @@ function M.setup(opts)
       local ok, err = pcall(M.go, vim.v.count)
       if not ok then vim.notify(err or "Failed to go to buffer", vim.log.levels.WARN) end
     end, { silent = true, desc = "Go to buffer at count in arglist" })
+  end
+  if keys.copy ~= false then
+    vim.keymap.set("n", keys.copy or "<leader><leader>c", function()
+      local ok, err = pcall(M.copy, vim.v.count)
+      if not ok then vim.notify(err or "Failed to copy target arglist into new local arglist", vim.log.levels.ERROR) end
+    end, { silent = true, desc = "Copy (count or global) arglist to a new local arglist"})
   end
   if keys.edit ~= false then
     vim.keymap.set("n", keys.edit or "<leader><leader>e", function()
