@@ -24,7 +24,9 @@ But you have to remember which letter it was, it is very easy to forget which go
 
 I found them to be not super enjoyable to use across buffers when I had more than 1 or 2 marks active.
 
-Then [harpoon](https://github.com/ThePrimeagen/harpoon)/[grapple](https://github.com/cbochs/grapple.nvim) came along and gave us a nice way to easily have an editable shortlist.
+In addition, they always take you to one particular place in a file, when often, what you want is where you were LAST within that file.
+
+Then [harpoon](https://github.com/ThePrimeagen/harpoon)/[grapple](https://github.com/cbochs/grapple.nvim) came along and gave us a nice way to easily have an editable shortlist of files.
 
 But because the bookmarks persist, I found myself using them only for relatively static and long-lived bookmarks.
 
