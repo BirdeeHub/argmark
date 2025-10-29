@@ -12,18 +12,37 @@ It provides:
 
 - Functions providing display text which may be used as a lualine component.
 
-## Why use this? I already have harpoon or grapple
+## Why use this? What would that look like? (or I already have harpoon or grapple? Why more lists?)
 
-I use one of those alongside this plugin. They serve different purposes for me.
+Global marks are the usual way of holding a location to go back to across files.
 
-I found I tend to not use them for bookmarks I will only need for the current session, because then I would need to remember to delete them.
+But you have to remember which letter it was, it is very easy to forget which goes where, they persist across sessions, and into different projects, etc.
 
-I find myself only using those plugins for things that I will need to access often for the forseeable future because of this.
+I found them to be not super enjoyable to use across buffers when I had more than 1 or 2 marks active.
 
-The neovim arglist is local to that session, so I find myself using this a lot more for anything that isn't something I will want bookmarked for a long time.
+Then harpoon/grapple came along and gave us a nice way to easily have an editable shortlist.
 
-However, any session saving like `mksession` or any of the plugins which wrap it will also still allow you to save them, if you want.
+But because the bookmarks persist, I found myself using them only for relatively static and long-lived bookmarks.
 
+I was hesitant to use them for bookmarks I will only need for the current session, because then I would need to delete them too.
+
+This means they were not solving my most common buffer navigation needs.
+
+The neovim arglist, however, does not persist (unless you save the session with `mksession` or something similar).
+
+This means, as you go along, files you may have to return to you can simply add to the list.
+That way, you can easily have a shortlist for just this session, or maybe even just that window with local arglists.
+
+You can then edit that shortlist in an easy to use floating buffer, add, delete, and copy to the lists, etc.
+
+In addition, you may have something else with populates the arglist, such as a plugin like vim-dirvish.
+
+If you want a nice interface to use and edit that, this plugin provides that with its edit window.
+
+The edit window and copy keybindings make managing local arglists easier as well.
+
+You will likely still wish to keybind some of the other builtin arglist functions/commands.
+This is because this plugin is meant to augment, not replace, the neovim arglist.
 
 ## Install:
 
