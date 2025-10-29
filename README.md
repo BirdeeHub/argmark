@@ -205,7 +205,7 @@ window-local arglist identified by its `arglist_id`.
 
 - If `arglist_id` is `0`, the **global** arglist is copied.
 - If `arglist_id` matches a window-local arglist, that list is copied.
-- If `tar_win_id` refers to a normal window, the copied list replaces its arglist.
+- If `tar_win_id` refers to a normal window, the copied list replaces its local arglist, or if it did not have one, creates a new one with the contents.
 - If `tar_win_id` is `-1`, the copied list replaces the **global** arglist.
 - If the target window previously had a local arglist and the global list is
   modified instead, its original local list is restored afterward.
