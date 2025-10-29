@@ -20,11 +20,13 @@ But you have to remember which letter it was, it is very easy to forget which go
 
 I found them to be not super enjoyable to use across buffers when I had more than 1 or 2 marks active.
 
-Then harpoon/grapple came along and gave us a nice way to easily have an editable shortlist.
+Then [harpoon](https://github.com/ThePrimeagen/harpoon)/[grapple](https://github.com/cbochs/grapple.nvim) came along and gave us a nice way to easily have an editable shortlist.
 
 But because the bookmarks persist, I found myself using them only for relatively static and long-lived bookmarks.
 
-I was hesitant to use them for bookmarks I will only need for the current session, because then I would need to delete them too.
+Persistent bookmarks are useful.
+
+But I was hesitant to use them for bookmarks I will only need for the current session, because then I would need to delete them too.
 
 This means they were not solving my most common buffer navigation needs.
 
@@ -35,7 +37,7 @@ That way, you can easily have a shortlist for just this session, or maybe even j
 
 You can then edit that shortlist in an easy to use floating buffer, add, delete, and copy to the lists, etc.
 
-In addition, you may have something else with populates the arglist, such as a plugin like vim-dirvish.
+In addition, you may have something else which populates the arglist, such as a plugin like [vim-dirvish](https://github.com/justinmk/vim-dirvish).
 
 If you want a nice interface to use and edit that, this plugin provides that with its edit window.
 
