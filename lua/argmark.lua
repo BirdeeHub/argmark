@@ -10,9 +10,23 @@
 ---key to quit without saving (default "q")
 ---@field exit?        string
 
+---@class ArgmarkEditDisplay
+---Argument used as the second argument to argmark.get_arglist_display_text
+---Allows customization of display of edit window title.
+---@field arglist_display_func? fun(id: integer, focused: boolean): string
+---See :h nvim_open_win()
+---@field border? string|string[]
+---See :h nvim_open_win()
+---@field footer? string
+---See :h nvim_open_win()
+---@field footer_pos? string
+---See :h nvim_open_win()
+---@field title_pos? string
+
 ---@class ArgmarkEditOpts
 ---override keybindings for the floating arglist editor
 ---@field keys? ArgmarkEditKeymap
+---@field display? ArgmarkEditDisplay
 
 ---@class ArgmarkKeymap
 ---remove buffer at count/current (<leader><leader>x)
@@ -37,8 +51,8 @@
 ---@field edit_opts? ArgmarkEditOpts
 
 ---@class Argmark
----@field get_display_text fun(tar_win_id?: integer): string
----@field get_arglist_display_text fun(tar_win_id?: integer): string
+---@field get_display_text fun(tar_win_id?: integer, format_name?: (fun(name: string, focused: boolean, idx: integer): string), format_list_id?: (fun(id: integer): string)): string
+---@field get_arglist_display_text fun(tar_win_id?: integer, format_list_id?: (fun(id: integer, focused: boolean): string)): string
 ---@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer)
 ---@field go fun(num?: integer, tar_win_id?: integer)
 ---@field copy fun(arglist_id?: integer, tar_win_id?: integer)
@@ -49,64 +63,98 @@
 
 local M = {}
 
+local function default_format_name(name, focused, idx)
+  name = vim.fn.fnamemodify(name, ":t")
+  if name == "" then name = vim.fn.fnamemodify(name .. ".", ":h:t") end
+  if name == "" then name = "~No~Name~" end
+  if focused then name = "["..name.."]" end
+  return name
+end
+local function default_format_id(id)
+  return id == 0 and "" or "L"..id..":"
+end
 ---@param tar_win_id? number
+---@param format_name? fun(name: string, focused: boolean, idx: integer): string
+---@param format_list_id? fun(id: integer): string
 ---@return string
-function M.get_display_text(tar_win_id)
-  tar_win_id = type(tar_win_id) == "number" and tar_win_id or nil
-  local lid = not tar_win_id and vim.fn.arglistid() or tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
-  local res = lid == 0 and "" or "L"..lid..":"
-  local arglist = vim.fn.argv(-1, tar_win_id)
-  ---@cast arglist string[] -- -1 as arg returns a list
+function M.get_display_text(tar_win_id, format_name, format_list_id)
+  if type(format_name) ~= "function" then format_name = default_format_name end
+  if type(format_list_id) ~= "function" then format_list_id = default_format_id end
+  local curwin = vim.api.nvim_get_current_win()
+  local lid = type(tar_win_id) ~= "number" and vim.fn.arglistid(curwin) or tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
+  tar_win_id = type(tar_win_id) == "number" and tar_win_id or curwin
+  local needs_force_global = tar_win_id < 0 and vim.fn.arglistid(curwin) ~= 0
+  local arglist = vim.fn.argv(-1, tar_win_id < 0 and -1 or tar_win_id)
+  if tar_win_id < 0 then tar_win_id = curwin end
+
+  local res = format_list_id(lid)
+  if type(res) ~= "string" then
+    error("parameter 3 of argmark.get_display_text: format_list_id?: (fun(id: integer): string) must return a string!")
+  end
+
+  local focused_idx = vim.api.nvim_win_call(tar_win_id, function()
+    if needs_force_global then vim.cmd.argglobal() end
+    local idx = vim.fn.argidx() + 1
+    if needs_force_global then vim.cmd.arglocal() end
+    return idx
+  end)
+
   for i = 1, #arglist do
-    local name = vim.fn.fnamemodify(arglist[i], ":t")
-    if name == "" then
-      name = vim.fn.fnamemodify(name .. ".", ":h:t")
+    local name = format_name(arglist[i], focused_idx == i, i)
+    if type(name) ~= "string" then
+      error("parameter 2 of argmark.get_display_text: format_name?: (fun(name: string, focused: boolean, idx: integer): string) must return a string!")
     end
-    if name == "" then name = "~No~Name~" end
-    if
-      i == ((not tar_win_id or tar_win_id < 0) and (vim.fn.argidx() + 1)
-      ---@diagnostic disable-next-line: param-type-mismatch
-      or (vim.api.nvim_win_call(tar_win_id, vim.fn.argidx) + 1))
-    then
-      res = res .. " [" .. name .. "]"
-    else
-      res = res .. " " .. name
-    end
+    res = res .. " " .. name
   end
   return res
 end
 
+local function default_format_list_id(id, focused)
+  if id == 0 then
+    if focused then
+      return "[Global]"
+    else
+      return "Global"
+    end
+  elseif focused then
+    return "[L:" .. id .. "]"
+  else
+    return "L:" .. id
+  end
+end
 ---@param tar_win_id? number
+---@param format_list_id? fun(id: integer, focused: boolean): string
 ---@return string
-function M.get_arglist_display_text(tar_win_id)
+function M.get_arglist_display_text(tar_win_id, format_list_id)
+  if type(format_list_id) ~= "function" then format_list_id = default_format_list_id end
   tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
   local temp = {}
-  local titlelist = { (tar_win_id < 0 or vim.fn.arglistid(tar_win_id) == 0) and "[Global]" or "Global" }
+  local focused_idx = tar_win_id < 0 and 0 or vim.fn.arglistid(tar_win_id)
+  local titlelist = { format_list_id(0, focused_idx == 0) }
+  if type(titlelist[1]) ~= "string" then
+    error("parameter 2 of argmark.get_arglist_display_text: format_list_id?: (fun(id: integer, focused: boolean): string) must return a string!")
+  end
   local wins = vim.api.nvim_list_wins()
   for i = 1, #wins do
     local c = wins[i]
     local lid = vim.fn.arglistid(c)
-    temp[lid] = temp[lid] or {}
-    table.insert(temp[lid], c)
-    if lid ~= 0 then
-      if c == tar_win_id then
-        temp[lid].str = " [L:" .. lid .. "]"
-      else
-        temp[lid].str = temp[lid].str or (" L:" .. lid)
+    if lid ~= 0 and not temp[lid] then
+      local newstr = format_list_id(lid, focused_idx == lid)
+      if type(newstr) ~= "string" then
+        error("parameter 2 of argmark.get_arglist_display_text: format_list_id?: (fun(id: integer, focused: boolean): string) must return a string!")
       end
+      temp[lid] = newstr
     end
   end
   local lids = {}
-  for lid, t in pairs(temp) do
-    if t.str then
+  for lid, _ in pairs(temp) do
       table.insert(lids, lid)
-    end
   end
   table.sort(lids)
   for _, lid in ipairs(lids) do
-    table.insert(titlelist, temp[lid].str)
+    table.insert(titlelist, temp[lid])
   end
-  return table.concat(titlelist)
+  return table.concat(titlelist, " ")
 end
 
 ---@param num_or_name_s? number|string|string[]
@@ -233,9 +281,10 @@ end
 ---@param winid? number
 ---@param tar_win_id? number
 ---@param title? string
+---@param opts ArgmarkEditDisplay
 ---@return number bufnr
 ---@return number winid
-local function setup_window(bufnr, winid, tar_win_id, title)
+local function setup_window(bufnr, winid, tar_win_id, title, opts)
   tar_win_id = (type(tar_win_id) == "number") and tar_win_id or vim.api.nvim_get_current_win()
   local abs_height, rel_width = 15, 0.7
   local rows, cols = vim.opt.lines._value, vim.opt.columns._value
@@ -252,10 +301,11 @@ local function setup_window(bufnr, winid, tar_win_id, title)
     width = math.ceil(cols * rel_width),
     row = math.ceil(rows / 2 - abs_height / 2),
     col = math.ceil(cols / 2 - cols * rel_width / 2),
-    border = "single",
-    footer = "ArglistEditor" .. (lid ~= 0 and " L:"..lid or ""),
-    footer_pos = "center",
-    title_pos = "center",
+    border = opts.border or "single",
+    style = "minimal",
+    footer = opts.footer or "Arglist Editor",
+    footer_pos = opts.footer_pos or "center",
+    title_pos = opts.title_pos or "center",
     title = title or "",
   }
   if type(winid) == "number" and vim.api.nvim_win_is_valid(winid) then
@@ -263,8 +313,6 @@ local function setup_window(bufnr, winid, tar_win_id, title)
   else
     winid = vim.api.nvim_open_win(bufnr, true, winconfig)
   end
-  vim.api.nvim_set_option_value("number", false, { win = winid })
-  vim.api.nvim_set_option_value("relativenumber", false, { win = winid })
   -- argv(-1) is always a list
   ---@diagnostic disable-next-line: param-type-mismatch
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn.argv(-1, lid == 0 and -1 or tar_win_id))
@@ -323,12 +371,12 @@ end
 function M.edit(opts, tar_win_id)
   opts = opts or {}
   local keys = opts.keys or {}
-  tar_win_id = (type(tar_win_id) == "number" and tar_win_id >= 0) and tar_win_id or vim.api.nvim_get_current_win()
-  local argseditor, winid = setup_window(vim.api.nvim_create_buf(false, true), nil, tar_win_id, M.get_arglist_display_text(tar_win_id))
+  local display_opts = opts.display or {}
+  local argseditor, winid = setup_window(vim.api.nvim_create_buf(false, true), nil, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
   local arglist_list = get_arglist_list()
 
   vim.keymap.set("n", keys.cycle_right or "<leader><leader>n", function()
-    local lid = vim.fn.arglistid(tar_win_id)
+    local lid = (type(tar_win_id) == "number" and tar_win_id >= 0) and vim.fn.arglistid(tar_win_id) or 0
     local found = nil
     for i = 1, #arglist_list do
       if arglist_list[i].id == lid then
@@ -342,13 +390,13 @@ function M.edit(opts, tar_win_id)
     else
       tar_win_id = arglist_list[found + 1].wins[1]
     end
-    setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id))
+    setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
   end, {
     buffer = argseditor,
     desc = "Cycle right through arglist choices",
   })
   vim.keymap.set("n", keys.cycle_left or "<leader><leader>p", function()
-    local lid = vim.fn.arglistid(tar_win_id)
+    local lid = (type(tar_win_id) == "number" and tar_win_id >= 0) and vim.fn.arglistid(tar_win_id) or 0
     local found = nil
     for i = #arglist_list, 1, -1 do
       if arglist_list[i].id == lid then
@@ -362,7 +410,7 @@ function M.edit(opts, tar_win_id)
     else
       tar_win_id = arglist_list[found - 1].wins[1]
     end
-    setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id))
+    setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
   end, {
     buffer = argseditor,
     desc = "Cycle left through arglist choices",

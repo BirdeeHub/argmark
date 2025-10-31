@@ -109,6 +109,13 @@ require("argmark").setup {
             exit = "q" -- exit
             -- :write or :w also saves, but doesn't quit
         }
+        display = {
+            arglist_display_func = nil
+            border = nil
+            footer = nil
+            footer_pos = nil
+            title_pos = nil
+        }
     }
 }
 ```
@@ -138,7 +145,12 @@ So a few more lua functions which allow you to select the global list as well as
 
 ---
 
-### `argmark.get_display_text(tar_win_id?: integer) → string`
+### `argmark.get_display_text(tar_win_id?: integer, format_name?, format_list_id?) → string`
+
+Parameters:
+- `tar_win_id?`: `integer`,
+- `format_name?`: `fun(name: string, focused: boolean, idx: integer): string`
+- `format_list_id?`: `fun(id: integer): string`
 
 Returns a formatted string representation of the arglist for `tar_win_id`.
 
@@ -156,6 +168,21 @@ require('lualine').setup {
         lualine_x = { require("argmark").get_display_text },
     }
 }
+```
+
+The default implementation of format_name and format_list_id are:
+
+```lua
+local function default_format_name(name, focused, idx)
+  name = vim.fn.fnamemodify(name, ":t")
+  if name == "" then name = vim.fn.fnamemodify(name .. ".", ":h:t") end
+  if name == "" then name = "~No~Name~" end
+  if focused then name = "["..name.."]" end
+  return name
+end
+local function default_format_id(id)
+  return id == 0 and "" or "L"..id..":"
+end
 ```
 
 ---
@@ -182,6 +209,14 @@ Exiting in another manner than the quit or exit keys, e.g. `<c-w>q`, will ask if
   * `go` (`string?`)
   * `quit` (`string?`)
   * `exit` (`string?`)
+
+* `display` table defining various display options
+
+  * `arglist_display_func` (`nil|fun(id: integer, focused: boolean): string?`) passed as second argument to `argmark.get_arglist_display_text`
+  * `border` (`string|string[]?`) see [:h nvim_open_win()](https://neovim.io/doc/user/api.html#nvim_open_win())
+  * `title_pos` (`string?`) see [:h nvim_open_win()](https://neovim.io/doc/user/api.html#nvim_open_win())
+  * `footer` (`string?`) see [:h nvim_open_win()](https://neovim.io/doc/user/api.html#nvim_open_win())
+  * `footer_pos` (`string?`) see [:h nvim_open_win()](https://neovim.io/doc/user/api.html#nvim_open_win())
 
 **Default in-buffer mappings:**
 
@@ -214,7 +249,11 @@ window-local arglist identified by its `arglist_id`.
 
 ---
 
-### `argmark.get_arglist_display_text(tar_win_id?: integer) → string`
+### `argmark.get_arglist_display_text(tar_win_id?: integer, format_list_id?) → string`
+
+Parameters:
+- `tar_win_id?`: `integer`,
+- `format_list_id?`: `fun(id: integer, focused: boolean): string`
 
 Returns a short label summarizing which arglists exist and which the given window belongs to.
 Example:
@@ -224,6 +263,24 @@ Example:
 ```
 
 This may be used as a lualine component as well if desired, but its main purpose is to display which arglist you are in for the edit window.
+
+Default implementation of format_list_id:
+
+```lua
+local function default_format_list_id(id, focused)
+  if id == 0 then
+    if focused then
+      return "[Global]"
+    else
+      return "Global"
+    end
+  elseif focused then
+    return "[L:" .. id .. "]"
+  else
+    return "L:" .. id
+  end
+end
+```
 
 ---
 
