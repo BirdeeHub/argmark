@@ -287,6 +287,7 @@ end
 ### `argmark.add(num_or_name_s?: integer|string|string[], tar_win_id?: integer)`
 
 Adds one or more entries to the arglist of the specified window.
+
 **Parameters:**
 
 * `num_or_name_s`:
@@ -304,6 +305,7 @@ Duplicates are automatically removed with `:argdedupe`.
 ### `argmark.go(num?: integer, tar_win_id?: integer)`
 
 Jumps to an argument entry by position.
+
 **Parameters:**
 
 * `num`: argument index (1-based)
@@ -317,6 +319,7 @@ Errors if arglist is empty.
 ### `argmark.rm(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)`
 
 Removes arguments from the list.
+
 **Parameters:**
 
 * `num_or_name`:
