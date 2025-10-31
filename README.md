@@ -147,7 +147,7 @@ So a few more lua functions which allow you to select the global list as well as
 
 ### `argmark.get_display_text(tar_win_id?: integer, format_name?, format_list_id?) → string`
 
-Parameters:
+**Parameters**:
 - `tar_win_id?`: `integer`,
 - `format_name?`: `fun(name: string, focused: boolean, idx: integer): string`
 - `format_list_id?`: `fun(id: integer): string`
@@ -251,7 +251,7 @@ window-local arglist identified by its `arglist_id`.
 
 ### `argmark.get_arglist_display_text(tar_win_id?: integer, format_list_id?) → string`
 
-Parameters:
+**Parameters**:
 - `tar_win_id?`: `integer`,
 - `format_list_id?`: `fun(id: integer, focused: boolean): string`
 
