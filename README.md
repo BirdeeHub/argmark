@@ -284,7 +284,7 @@ end
 
 ---
 
-### `argmark.add(num_or_name_s?: integer|string|string[], tar_win_id?: integer)`
+### `argmark.add(num_or_name_s?: integer|string|string[], tar_win_id?: integer, target_arg_idx?: integer)`
 
 Adds one or more entries to the arglist of the specified window.
 
@@ -297,6 +297,7 @@ Adds one or more entries to the arglist of the specified window.
   * `string[]`: list of file paths
   * *nil*: adds current buffer (`%`)
 * `tar_win_id`: window id or `-1` for global list, defaults to current
+* `target_arg_idx`: target index for the new item (1-based). Will insert at that index, and move higher elements up 1
 
 Duplicates are automatically removed with `:argdedupe`.
 

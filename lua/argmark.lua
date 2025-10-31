@@ -53,7 +53,7 @@
 ---@class Argmark
 ---@field get_display_text fun(tar_win_id?: integer, format_name?: (fun(name: string, focused: boolean, idx: integer): string), format_list_id?: (fun(id: integer): string)): string
 ---@field get_arglist_display_text fun(tar_win_id?: integer, format_list_id?: (fun(id: integer, focused: boolean): string)): string
----@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer)
+---@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer, target_arg_idx?: integer)
 ---@field go fun(num?: integer, tar_win_id?: integer)
 ---@field copy fun(arglist_id?: integer, tar_win_id?: integer)
 ---@field rm fun(num_or_name?: integer|string|string[], num?: integer, tar_win_id?: integer)
@@ -163,10 +163,16 @@ end
 
 ---@param num_or_name_s? number|string|string[]
 ---@param tar_win_id? number
-function M.add(num_or_name_s, tar_win_id)
+---@param target_arg_idx? number
+function M.add(num_or_name_s, tar_win_id, target_arg_idx)
   tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
   local arglen = vim.fn.argc(tar_win_id)
   local argtype = type(num_or_name_s)
+  if type(target_arg_idx) ~= "number" or target_arg_idx < 1 or target_arg_idx - 1 > arglen then
+    target_arg_idx = arglen
+  else
+    target_arg_idx = target_arg_idx - 1
+  end
   local to_add = {}
   if argtype == "number" and num_or_name_s > 0 and arglen >= num_or_name_s then
     to_add[1] = vim.fn.bufname(num_or_name_s)
@@ -181,7 +187,7 @@ function M.add(num_or_name_s, tar_win_id)
     if needs_force_global then vim.cmd.argglobal() end
     vim.cmd.argadd {
       args = to_add,
-      range = { arglen, arglen },
+      range = { target_arg_idx, target_arg_idx },
     }
     vim.cmd.argdedupe()
     if needs_force_global then vim.cmd.arglocal() end
