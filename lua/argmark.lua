@@ -286,7 +286,7 @@ end
 ---@return number winid
 local function setup_window(bufnr, winid, tar_win_id, title, opts)
   tar_win_id = (type(tar_win_id) == "number") and tar_win_id or vim.api.nvim_get_current_win()
-  local abs_height, rel_width = 15, 0.7
+  local rel_height, rel_width = 0.7, 0.7
   local rows, cols = vim.opt.lines._value, vim.opt.columns._value
   local lid = tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
   local filetype = "ArglistEditor"
@@ -295,11 +295,12 @@ local function setup_window(bufnr, winid, tar_win_id, title, opts)
   vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
   vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = bufnr })
   vim.api.nvim_set_option_value("swapfile", false, { buf = bufnr })
+  local height = math.min(vim.fn.argc(lid == 0 and -1 or tar_win_id) + 3, math.ceil(rows * rel_height))
   local winconfig = {
     relative = "editor",
-    height = math.min(vim.fn.argc(lid == 0 and -1 or tar_win_id) + 2, abs_height),
+    height = height,
     width = math.ceil(cols * rel_width),
-    row = math.ceil(rows / 2 - abs_height / 2),
+    row = math.ceil(rows / 2 - height / 2),
     col = math.ceil(cols / 2 - cols * rel_width / 2),
     border = opts.border or "single",
     style = "minimal",
