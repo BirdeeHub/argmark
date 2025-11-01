@@ -51,7 +51,7 @@
 ---@field edit_opts? ArgmarkEditOpts
 
 ---@class Argmark
----@field get_display_text fun(tar_win_id?: integer, format_name?: (fun(name: string, focused: boolean, idx: integer): string), format_list_id?: (fun(id: integer): string)): string
+---@field get_display_text fun(tar_win_id?: integer, format_name?: (fun(name: string, focused: boolean, idx: integer): string), format_list_id?: (fun(id: integer): string?)): string
 ---@field get_arglist_display_text fun(tar_win_id?: integer, format_list_id?: (fun(id: integer, focused: boolean): string)): string
 ---@field add fun(num_or_name_s?: integer|string|string[], tar_win_id?: integer, target_arg_idx?: integer)
 ---@field go fun(num?: integer, tar_win_id?: integer)
@@ -72,11 +72,11 @@ do
     return name
   end
   local function default_format_id(id)
-    return id == 0 and "" or "L"..id..":"
+    return id ~= 0 and "L"..id..":" or nil
   end
   ---@param tar_win_id? number
   ---@param format_name? fun(name: string, focused: boolean, idx: integer): string
-  ---@param format_list_id? fun(id: integer): string
+  ---@param format_list_id? fun(id: integer): string?
   ---@return string
   function M.get_display_text(tar_win_id, format_name, format_list_id)
     if type(format_name) ~= "function" then format_name = default_format_name end
@@ -88,9 +88,9 @@ do
     local arglist = vim.fn.argv(-1, tar_win_id < 0 and -1 or tar_win_id)
     if tar_win_id < 0 then tar_win_id = curwin end
 
-    local res = format_list_id(lid)
-    if type(res) ~= "string" then
-      error("parameter 3 of argmark.get_display_text: format_list_id?: (fun(id: integer): string) must return a string!")
+    local res = { format_list_id(lid) }
+    if type(res[1]) ~= "string" then
+      res[1] = nil
     end
 
     local focused_idx = vim.api.nvim_win_call(tar_win_id, function()
@@ -102,17 +102,18 @@ do
 
     for i = 1, #arglist do
       local name = format_name(arglist[i], focused_idx == i, i)
-      if type(name) ~= "string" then
+      if type(name) == "string" then
+        table.insert(res, name)
+      else
         error("parameter 2 of argmark.get_display_text: format_name?: (fun(name: string, focused: boolean, idx: integer): string) must return a string!")
       end
-      res = res .. " " .. name
     end
-    return res
+    return table.concat(res, " ")
   end
 end
 
 do
-  local function default_format_id(id, focused)
+  local function default_format_list_id(id, focused)
     if id == 0 then
       if focused then
         return "[Global]"
@@ -129,7 +130,7 @@ do
   ---@param format_list_id? fun(id: integer, focused: boolean): string
   ---@return string
   function M.get_arglist_display_text(tar_win_id, format_list_id)
-    if type(format_list_id) ~= "function" then format_list_id = default_format_id end
+    if type(format_list_id) ~= "function" then format_list_id = default_format_list_id end
     tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
     local temp = {}
     local focused_idx = tar_win_id < 0 and 0 or vim.fn.arglistid(tar_win_id)

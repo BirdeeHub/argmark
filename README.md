@@ -150,7 +150,7 @@ So a few more lua functions which allow you to select the global list as well as
 **Parameters**:
 - `tar_win_id?`: `integer`,
 - `format_name?`: `fun(name: string, focused: boolean, idx: integer): string`
-- `format_list_id?`: `fun(id: integer): string`
+- `format_list_id?`: `fun(id: integer): string?`
 
 Returns a formatted string representation of the arglist for `tar_win_id`.
 
@@ -181,7 +181,7 @@ local function default_format_name(name, focused, idx)
   return name
 end
 local function default_format_id(id)
-  return id == 0 and "" or "L"..id..":"
+  return id ~= 0 and "L"..id..":" or nil
 end
 ```
 
