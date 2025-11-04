@@ -375,10 +375,33 @@ do
     for i = 1, #lids do
       table.insert(result, temp[lids[i]])
     end
-    if result[1].id ~= 0 then
+    if not result[1] or result[1].id ~= 0 then
       table.insert(result, 1, { id = 0, wins = { -1 } })
+    else
+      table.insert(result[1].wins, 1, -1)
     end
     return result
+  end
+
+  ---@return number tar_win_id
+  local function iterwin(list, old_win, rev)
+    local lid = (type(old_win) == "number" and old_win >= 0) and vim.fn.arglistid(old_win) or 0
+    local found = nil
+    for i = rev and #list or 1, rev and 1 or #list, rev and -1 or 1 do
+      if list[i].id == lid then
+        found = i
+        break
+      end
+    end
+    if not found then
+      found = rev and #list or 1
+    else
+      found = (rev and found - 1) or (found + 1)
+    end
+    if found < 1 or found > #list then
+      found = rev and #list or 1
+    end
+    return list[found].wins[1]
   end
 
   ---@param opts? ArgmarkEditOpts
@@ -389,42 +412,17 @@ do
     local display_opts = opts.display or {}
     local argseditor, winid = setup_window(vim.api.nvim_create_buf(false, true), nil, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
     local arglist_list = get_arglist_list()
+    if type(tar_win_id) ~= "number" then tar_win_id = vim.api.nvim_get_current_win() end
 
     vim.keymap.set("n", keys.cycle_right or "<leader><leader>n", function()
-      local lid = (type(tar_win_id) == "number" and tar_win_id >= 0) and vim.fn.arglistid(tar_win_id) or 0
-      local found = nil
-      for i = 1, #arglist_list do
-        if arglist_list[i].id == lid then
-          found = i
-        end
-      end
-      if found == nil then
-        tar_win_id = arglist_list[#arglist_list > 1 and 2 or 1].wins[1]
-      elseif found >= #arglist_list then
-        tar_win_id = arglist_list[1].wins[1]
-      else
-        tar_win_id = arglist_list[found + 1].wins[1]
-      end
+      tar_win_id = iterwin(arglist_list, tar_win_id)
       setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
     end, {
       buffer = argseditor,
       desc = "Cycle right through arglist choices",
     })
     vim.keymap.set("n", keys.cycle_left or "<leader><leader>p", function()
-      local lid = (type(tar_win_id) == "number" and tar_win_id >= 0) and vim.fn.arglistid(tar_win_id) or 0
-      local found = nil
-      for i = #arglist_list, 1, -1 do
-        if arglist_list[i].id == lid then
-          found = i
-        end
-      end
-      if found == nil then
-        tar_win_id = arglist_list[#arglist_list].wins[1]
-      elseif found <= 1 then
-        tar_win_id = arglist_list[#arglist_list].wins[1]
-      else
-        tar_win_id = arglist_list[found - 1].wins[1]
-      end
+      tar_win_id = iterwin(arglist_list, tar_win_id, true)
       setup_window(argseditor, winid, tar_win_id, M.get_arglist_display_text(tar_win_id, display_opts.arglist_display_func), display_opts)
     end, {
       buffer = argseditor,
