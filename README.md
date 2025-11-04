@@ -136,23 +136,11 @@ Note: "accepts a count" means that you can input a number before inputting the k
 
 Note 2: Outside of using the `go` keybinding, to change which is the "current argument" in the argslist, use `:n`/`:next` or `:N`/`:prev`.
 
-Note 3: To change back to the global argslist after creating a local one with `:arglocal` or the copy keybind, use `:argglobal`. Then to reenter it, you can use `:arglocal` again.
+Note 3: To change back to the global argslist after creating a local one with `:arglocal` or the copy keybind, use `:argglobal`.
 
 You can map them to something if desired, remember that the argslist is a builtin thing.
 
 While most of the arglist functions in nvim only target the current window's arglist that is often enough.
-
-For example, you may like this keybind to toggle the arglist between global and local for the current window:
-
-```lua
-vim.keymap.set('n', '<leader><leader>t', function()
-  if vim.fn.arglistid() == 0 then
-    vim.cmd.arglocal()
-  else
-    vim.cmd.argglobal()
-  end
-end, { desc = "Arglist local/global toggle" })
-```
 
 ---
 
