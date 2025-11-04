@@ -138,10 +138,21 @@ Note 2: Outside of using the `go` keybinding, to change which is the "current ar
 
 Note 3: To change back to the global argslist after creating a local one with `:arglocal` or the copy keybind, use `:argglobal`. Then to reenter it, you can use `:arglocal` again.
 
-You can map them to something if desired, but the argslist is a builtin thing,
-and many of the builtin methods are good enough.
-That being said, they usually only target the current window's arglist.
-So a few more lua functions which allow you to select the global list as well as by window may be added eventually.
+You can map them to something if desired, remember that the argslist is a builtin thing.
+
+While most of the arglist functions in nvim only target the current window's arglist that is often enough.
+
+For example, you may like this keybind to toggle the arglist between global and local for the current window:
+
+```lua
+vim.keymap.set('n', '<leader><leader>t', function()
+  if vim.fn.arglistid() == 0 then
+    vim.cmd.arglocal()
+  else
+    vim.cmd.argglobal()
+  end
+end, { desc = "Arglist local/global toggle" })
+```
 
 ---
 
