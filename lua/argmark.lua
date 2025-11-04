@@ -495,7 +495,8 @@ function M.setup(opts)
   end
   if keys.edit ~= false then
     vim.keymap.set("n", keys.edit or "<leader><leader>e", function()
-      M.edit(opts.edit_opts)
+      local ok, err = pcall(M.edit, opts.edit_opts)
+      if not ok then vim.notify(err or "Edit window failed!", vim.log.levels.ERROR) end
     end, { silent = true, desc = "edit arglist in floating window"})
   end
   if keys.clear ~= false then
@@ -505,7 +506,10 @@ function M.setup(opts)
     end, { desc = "Clear arglist" })
   end
   if keys.add_windows ~= false then
-    vim.keymap.set("n", keys.add_windows or "<leader><leader>A", M.add_windows, { desc = "Add current buffers for all windows to arglist" })
+    vim.keymap.set("n", keys.add_windows or "<leader><leader>A", function()
+      local ok, err = pcall(M.add_windows)
+      if not ok then vim.notify(err or "Failed to add all windowed buffers", vim.log.levels.WARN) end
+    end, { desc = "Add current buffers for all windows to arglist" })
   end
 end
 
