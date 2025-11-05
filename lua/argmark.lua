@@ -63,6 +63,37 @@
 
 local M = {}
 
+local function tar_win_call(tar_win_id, f)
+  if type(tar_win_id) ~= "number" then tar_win_id = vim.api.nvim_get_current_win() end
+  if tar_win_id >= 0 then
+    return vim.api.nvim_win_call(tar_win_id, f)
+  else
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_set_option_value("buflisted", false, { buf = buf })
+    vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
+    vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
+    vim.api.nvim_set_option_value("swapfile", false, { buf = buf })
+    local win = vim.api.nvim_open_win(buf, false, {
+      relative = 'editor',
+      row = 0,
+      col = 0,
+      width = 1,
+      height = 1,
+      style = 'minimal',
+      noautocmd = true,
+      focusable = false,
+      hide = true,
+    })
+    local ok, res = pcall(vim.api.nvim_win_call, win, function()
+      vim.cmd.argglobal()
+      return f()
+    end)
+    vim.api.nvim_win_close(win, true)
+    if not ok then error(res) end
+    return res
+  end
+end
+
 do
   local function default_format_name(name, focused, idx)
     name = vim.fn.fnamemodify(name, ":t")
@@ -81,25 +112,15 @@ do
   function M.get_display_text(tar_win_id, format_name, format_list_id)
     if type(format_name) ~= "function" then format_name = default_format_name end
     if type(format_list_id) ~= "function" then format_list_id = default_format_id end
-    local curwin = vim.api.nvim_get_current_win()
-    local lid = type(tar_win_id) ~= "number" and vim.fn.arglistid(curwin) or tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
-    tar_win_id = type(tar_win_id) == "number" and tar_win_id or curwin
-    local needs_force_global = tar_win_id < 0 and vim.fn.arglistid(curwin) ~= 0
-    local arglist = vim.fn.argv(-1, tar_win_id < 0 and -1 or tar_win_id)
-    if tar_win_id < 0 then tar_win_id = curwin end
+    local lid = type(tar_win_id) ~= "number" and vim.fn.arglistid() or tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
+    local arglist = vim.fn.argv(-1, type(tar_win_id) == "number" and tar_win_id or nil)
 
     local res = { format_list_id(lid) }
     if type(res[1]) ~= "string" then
       res[1] = nil
     end
 
-    local focused_idx = vim.api.nvim_win_call(tar_win_id, function()
-      if needs_force_global then vim.cmd.argglobal() end
-      local idx = vim.fn.argidx() + 1
-      if needs_force_global then vim.cmd.arglocal() end
-      return idx
-    end)
-
+    local focused_idx = tar_win_call(tar_win_id, vim.fn.argidx) + 1
     for i = 1, #arglist do
       local name = format_name(arglist[i], focused_idx == i, i)
       if type(name) == "string" then
@@ -183,35 +204,27 @@ function M.add(num_or_name_s, tar_win_id, target_arg_idx)
   elseif argtype ~= "string" then
     to_add[1] = "%"
   end
-  vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
-    local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-    if needs_force_global then vim.cmd.argglobal() end
+  tar_win_call(tar_win_id, function()
     vim.cmd.argadd {
       args = to_add,
       range = { target_arg_idx, target_arg_idx },
     }
     vim.cmd.argdedupe()
-    if needs_force_global then vim.cmd.arglocal() end
   end)
 end
 
 ---@param num? number
 ---@param tar_win_id? number
 function M.go(num, tar_win_id)
-  tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
-  local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
+  tar_win_id = type(tar_win_id) == "number" and tar_win_id or nil
   local arglen = vim.fn.argc(tar_win_id)
   if num > 0 and arglen >= num then
-    vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
-      if needs_force_global then vim.cmd.argglobal() end
+    tar_win_call(tar_win_id, function()
       vim.cmd.argument(num)
-      if needs_force_global then vim.cmd.arglocal() end
     end)
   elseif arglen > 0 then
-    vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
-      if needs_force_global then vim.cmd.argglobal() end
+    tar_win_call(tar_win_id, function()
       vim.cmd.argument(vim.fn.argidx() + 1)
-      if needs_force_global then vim.cmd.arglocal() end
     end)
   else
     error("No args to go to!")
@@ -222,12 +235,9 @@ end
 ---@param num? number
 ---@param tar_win_id? number
 function M.rm(num_or_name, num, tar_win_id)
-  tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
   local atype = type(num_or_name)
-  local arglen = vim.fn.argc(tar_win_id)
-  vim.api.nvim_win_call(tar_win_id < 0 and vim.api.nvim_get_current_win() or tar_win_id, function()
-    local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-    if needs_force_global then vim.cmd.argglobal() end
+  tar_win_call(tar_win_id, function()
+    local arglen = vim.fn.argc()
     if atype == "number" and num_or_name > 0 and arglen >= num_or_name then
       if type(num) == "number" and num > 0 and arglen >= num then
         vim.cmd.argdelete { range = { num_or_name, num } }
@@ -241,7 +251,6 @@ function M.rm(num_or_name, num, tar_win_id)
     else
       vim.cmd.argdelete "%"
     end
-    if needs_force_global then vim.cmd.arglocal() end
   end)
 end
 
@@ -261,32 +270,25 @@ do
   ---@param arglist_id number
   ---@param tar_win_id? number
   function M.copy(arglist_id, tar_win_id)
-    tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
     if type(arglist_id) ~= "number" or arglist_id < 0 then
       arglist_id = 0
     end
-    local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-    vim.api.nvim_win_call(needs_force_global and vim.api.nvim_get_current_win() or tar_win_id, function()
-      if needs_force_global then vim.cmd.argglobal() -- if not setting into global list,
-      else vim.cmd.arglocal() end  -- make a window-local list
+    tar_win_call(tar_win_id, function()
+      -- make a new list if there wasn't one and not forcing global
+      if tar_win_id >= 0 and vim.fn.arglistid() == 0 then vim.cmd.arglocal() end
       vim.cmd.argdelete "*"
       vim.cmd.argadd({ args = get_arglist(arglist_id) })
-      if needs_force_global then vim.cmd.arglocal() end
     end)
   end
 end
 
 ---@param tar_win_id? number
 function M.add_windows(tar_win_id)
-  tar_win_id = (type(tar_win_id) == "number" and tar_win_id >= 0) and tar_win_id or vim.api.nvim_get_current_win()
-  vim.api.nvim_win_call(tar_win_id or vim.api.nvim_get_current_win(), function()
-    local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-    if needs_force_global then vim.cmd.argglobal() end
+  tar_win_call(tar_win_id, function()
     for _, win in ipairs(vim.api.nvim_list_wins()) do
       vim.cmd.argadd(vim.fn.bufname(vim.api.nvim_win_get_buf(win)))
     end
     vim.cmd.argdedupe()
-    if needs_force_global then vim.cmd.arglocal() end
   end)
 end
 
@@ -305,6 +307,7 @@ do
     local lid = tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
     local filetype = "ArglistEditor"
     vim.api.nvim_buf_set_name(bufnr, "ArglistEditor")
+    vim.api.nvim_set_option_value("buflisted", false, { buf = bufnr })
     vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = bufnr })
@@ -337,23 +340,19 @@ do
   ---@param bufnr number
   ---@param tar_win_id? number
   local function overwrite_argslist(bufnr, tar_win_id)
-    tar_win_id = type(tar_win_id) == "number" and tar_win_id or vim.api.nvim_get_current_win()
-    vim.api.nvim_win_call(tar_win_id >= 0 and tar_win_id or vim.api.nvim_get_current_win(), function()
+    tar_win_call(tar_win_id, function()
       local to_write = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true) or {}
       for i = #to_write, 1, -1 do
         if to_write[i]:match("^%s*$") then
           table.remove(to_write, i)
         end
       end
-      local needs_force_global = tar_win_id < 0 and vim.fn.arglistid() ~= 0
-      if needs_force_global then vim.cmd.argglobal() end
       pcall(vim.cmd.argdelete, "*")
       if #to_write > 0 then
         local ok, err = pcall(vim.cmd.argadd, { args = to_write })
         if not ok then vim.notify(err, vim.log.levels.ERROR) end
         vim.cmd.argdedupe()
       end
-      if needs_force_global then vim.cmd.arglocal() end
     end)
   end
 
@@ -377,8 +376,6 @@ do
     end
     if not result[1] or result[1].id ~= 0 then
       table.insert(result, 1, { id = 0, wins = { -1 } })
-    else
-      table.insert(result[1].wins, 1, -1)
     end
     return result
   end
