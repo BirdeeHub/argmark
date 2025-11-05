@@ -69,7 +69,6 @@ local function tar_win_call(tar_win_id, f)
     return vim.api.nvim_win_call(tar_win_id, f)
   else
     local buf = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_set_option_value("buflisted", false, { buf = buf })
     vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
     vim.api.nvim_set_option_value("swapfile", false, { buf = buf })
@@ -307,7 +306,6 @@ do
     local lid = tar_win_id >= 0 and vim.fn.arglistid(tar_win_id) or 0
     local filetype = "ArglistEditor"
     vim.api.nvim_buf_set_name(bufnr, "ArglistEditor")
-    vim.api.nvim_set_option_value("buflisted", false, { buf = bufnr })
     vim.api.nvim_set_option_value("filetype", filetype, { buf = bufnr })
     vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = bufnr })
