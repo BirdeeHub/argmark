@@ -273,10 +273,15 @@ do
       arglist_id = 0
     end
     tar_win_call(tar_win_id, function()
+      -- read first: the source may be the list about to be cleared
+      local args = get_arglist(arglist_id)
       -- make a new list if there wasn't one and not forcing global
-      if tar_win_id >= 0 and vim.fn.arglistid() == 0 then vim.cmd.arglocal() end
-      vim.cmd.argdelete "*"
-      vim.cmd.argadd({ args = get_arglist(arglist_id) })
+      local forcing_global = type(tar_win_id) == "number" and tar_win_id < 0
+      if not forcing_global and vim.fn.arglistid() == 0 then vim.cmd.arglocal() end
+      -- `%argdelete` rather than `argdelete *`, which fails on an empty list
+      vim.cmd("%argdelete")
+      -- `:argadd` with no names would add the current buffer
+      if #args > 0 then vim.cmd.argadd({ args = args }) end
     end)
   end
 end
